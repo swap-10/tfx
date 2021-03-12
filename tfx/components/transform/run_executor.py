@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Invoke transform executor for data transformation."""
+"""Invoke transform processor for data transformation."""
 
 import argparse
 
@@ -20,9 +20,10 @@ from typing import List, Tuple
 import absl
 from absl import app
 from absl.flags import argparse_flags
+import apache_beam as beam
 
+from tfx.components.transform import executor
 from tfx.components.transform import labels
-from tfx.components.transform.executor import Executor
 from tfx.proto import example_gen_pb2
 
 
@@ -59,8 +60,12 @@ def _run_transform(args, beam_pipeline_args):
       labels.PER_SET_STATS_OUTPUT_PATHS_LABEL: (args.per_set_stats_outputs),
       labels.TEMP_OUTPUT_LABEL: args.tmp_location,
   }
-  executor = Executor(Executor.Context(beam_pipeline_args=beam_pipeline_args))
-  executor.Transform(inputs, outputs, args.status_file)
+
+  def get_beam_pipeline():
+    return beam.Pipeline(beam_pipeline_args)
+
+  executor.TransformProcessor().Transform(inputs, outputs, get_beam_pipeline,
+                                          args.status_file)
 
 
 def _parse_flags(argv: List[str]) -> Tuple[argparse.Namespace, List[str]]:
