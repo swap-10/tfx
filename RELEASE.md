@@ -6,6 +6,8 @@
     In the case of multiple runtime parameters, format is as follows:
     '--runtime_parameter=<parameter_name>=<parameter_value> --runtime_parameter
     =<parameter_name>=<parameter_value>'
+*  Added support for outputting and encoding `tf.RaggedTensor`s in TFX Transform
+   component.
 
 ## Breaking Changes
 
