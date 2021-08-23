@@ -13,11 +13,15 @@
 # limitations under the License.
 """Base class for classes representing a dataset for the benchmark."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import tensorflow as tf
 
 
-class BenchmarkDataset:
+class BenchmarkDataset(object):
   """Base class for classes representing a dataset for the benchmark."""
 
   def __init__(self, base_dir=None):

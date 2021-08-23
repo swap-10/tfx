@@ -13,12 +13,16 @@
 # limitations under the License.
 """Chicago taxi dataset."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import itertools
 import math
 import os
 import shutil
 import tempfile
-from typing import Optional
+from typing import Optional, Text
 
 from absl import logging
 import apache_beam as beam
@@ -212,8 +216,8 @@ class WideChicagoTaxiDataset(ChicagoTaxiDataset):
   _BUCKETIZE_KEYS = taxi_utils._BUCKET_FEATURE_KEYS
   _SCALE_KEYS = taxi_utils._DENSE_FLOAT_FEATURE_KEYS
 
-  def __init__(self, base_dir: Optional[str] = None, num_analyzers: int = 10):
-    super().__init__(base_dir)
+  def __init__(self, base_dir: Optional[Text] = None, num_analyzers: int = 10):
+    super(WideChicagoTaxiDataset, self).__init__(base_dir)
     self._num_vocabs = max(
         len(self._VOCABULARY_KEYS),
         math.ceil(num_analyzers * self._VOCABS_SHARE))

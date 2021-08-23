@@ -13,7 +13,7 @@
 # limitations under the License.
 """Tests for tfx.dsl.experimental.conditionals.conditional."""
 
-from typing import Any, Dict
+from typing import Any, Dict, Text
 
 import tensorflow as tf
 from tfx.dsl.components.base import base_node
@@ -24,15 +24,15 @@ from tfx.dsl.placeholder import placeholder
 class _FakeNode(base_node.BaseNode):
 
   @property
-  def inputs(self) -> Dict[str, Any]:
+  def inputs(self) -> Dict[Text, Any]:
     return {}
 
   @property
-  def outputs(self) -> Dict[str, Any]:
+  def outputs(self) -> Dict[Text, Any]:
     return {}
 
   @property
-  def exec_properties(self) -> Dict[str, Any]:
+  def exec_properties(self) -> Dict[Text, Any]:
     return {}
 
 
@@ -74,7 +74,7 @@ class ConditionalTest(tf.test.TestCase):
 
   def testNestedConditionWithDuplicatePredicates(self):
     pred = _FakePredicate('pred')
-    with self.assertRaisesRegex(
+    with self.assertRaisesRegexp(
         ValueError, 'Nested conditionals with duplicate predicates'):
       with conditional.Cond(pred):
         unused_node1 = _FakeNode().with_id('node1')
