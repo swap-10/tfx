@@ -23,6 +23,7 @@ from absl.testing.absltest import mock
 import tensorflow as tf
 from tfx.orchestration import metadata
 from tfx.orchestration.experimental.core import async_pipeline_task_gen
+from tfx.orchestration.experimental.core import mlmd_state
 from tfx.orchestration.experimental.core import pipeline_ops
 from tfx.orchestration.experimental.core import pipeline_state as pstate
 from tfx.orchestration.experimental.core import service_jobs
@@ -31,6 +32,9 @@ from tfx.orchestration.experimental.core import task as task_lib
 from tfx.orchestration.experimental.core import task_gen_utils
 from tfx.orchestration.experimental.core import task_queue as tq
 from tfx.orchestration.experimental.core import test_utils
+from tfx.orchestration.experimental.core.task_schedulers import manual_task_scheduler
+from tfx.orchestration.portable import execution_publish_utils
+from tfx.orchestration.portable.mlmd import context_lib
 from tfx.orchestration.portable.mlmd import execution_lib
 from tfx.proto.orchestration import pipeline_pb2
 from tfx.utils import status as status_lib
@@ -912,6 +916,44 @@ class PipelineOpsTest(test_utils.TfxTest, parameterized.TestCase):
       with pstate.PipelineState.load(m, pipeline_uid) as pipeline_state:
         node_state = pipeline_state.get_node_state(transform_node_uid)
         self.assertEqual(pstate.NodeState.STARTED, node_state.state)
+
+  def test_resume_manual_node(self):
+    pipeline = pipeline_pb2.Pipeline()
+    self.load_proto_from_text(
+        os.path.join(
+            os.path.dirname(__file__), 'testdata', 'manual_node.pbtxt'),
+        pipeline)
+    manual_node = pipeline.nodes[0].pipeline_node
+    with self._mlmd_connection as m:
+      pstate.PipelineState.new(m, pipeline)
+      contexts = context_lib.prepare_contexts(m, manual_node.contexts)
+      execution = execution_publish_utils.register_execution(
+          m, manual_node.node_info.type, contexts)
+
+      with mlmd_state.mlmd_execution_atomic_op(
+          mlmd_handle=m,
+          execution_id=execution.id) as execution:
+        node_state_mlmd_value = execution.custom_properties.get(
+            manual_task_scheduler.NODE_STATE_PROPERTY_KEY)
+        node_state = manual_task_scheduler.ManualNodeState.from_mlmd_value(
+            node_state_mlmd_value)
+      self.assertEqual(node_state.state,
+                       manual_task_scheduler.ManualNodeState.WAITING)
+
+      pipeline_uid = task_lib.PipelineUid.from_pipeline(pipeline)
+      node_uid = task_lib.NodeUid(node_id='manual_a', pipeline_uid=pipeline_uid)
+
+      pipeline_ops.resume_manual_node(m, node_uid)
+
+      with mlmd_state.mlmd_execution_atomic_op(
+          mlmd_handle=m,
+          execution_id=execution.id) as execution:
+        node_state_mlmd_value = execution.custom_properties.get(
+            manual_task_scheduler.NODE_STATE_PROPERTY_KEY)
+        node_state = manual_task_scheduler.ManualNodeState.from_mlmd_value(
+            node_state_mlmd_value)
+      self.assertEqual(node_state.state,
+                       manual_task_scheduler.ManualNodeState.COMPLETED)
 
 
 if __name__ == '__main__':

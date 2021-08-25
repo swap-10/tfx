@@ -1,0 +1,50 @@
+# proto-file: tfx/proto/orchestration/pipeline.proto
+# proto-message: Pipeline
+
+pipeline_info: {
+  id: "test-pipeline-manual-node"
+}
+execution_mode: SYNC
+nodes {
+  pipeline_node {
+    node_info {
+      type {
+        name: "tfx.dsl.components.common.manual_node.ManualNode"
+      }
+      id: "manual_a"
+    }
+    contexts {
+      contexts {
+        type {
+          name: "pipeline"
+        }
+        name {
+          field_value {
+            string_value: "my_pipeline"
+          }
+        }
+      }
+      contexts {
+        type {
+          name: "pipeline_run"
+        }
+        name {
+          field_value {
+            string_value: 'run0'
+          }
+        }
+      }
+      contexts {
+        type {
+          name: "component"
+        }
+        name {
+          field_value {
+            string_value: "manual_a"
+          }
+        }
+      }
+    }
+    upstream_nodes: "manual_a"
+  }
+}
