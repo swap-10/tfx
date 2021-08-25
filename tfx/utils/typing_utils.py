@@ -24,6 +24,15 @@ MultiMap = Mapping[_KT, Sequence[_VT_co]]
 ArtifactMultiMap = MultiMap[str, tfx.types.Artifact]
 
 
+def is_homogeneous_artifact_list(value: Any) -> bool:
+  """Checks value is Sequence[T] where T is subclass of Artifact."""
+  return (
+      isinstance(value, collections.abc.Sequence) and
+      (not value or
+       (issubclass(type(value[0]), tfx.types.Artifact) and
+        all(isinstance(v, type(value[0])) for v in value[1:]))))
+
+
 def is_artifact_multimap(value: Any) -> bool:
   """Checks value is Mapping[str, Sequence[Artifact]] type."""
   if not isinstance(value, collections.abc.Mapping):
