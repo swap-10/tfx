@@ -29,6 +29,8 @@
 *   Fixed an issue where ClientOptions with regional endpoint was
     incorrectly left out in Vertex AI pusher.
 *   Depends on `apache-beam[gcp]>=2.31,<2.32`.
+*   Fix component to raise error if its input required channel (specified from
+    ComponentSpec) has no artifacts in it.
 *   Depends on `keras-tuner>=1.0.4,<2`.
 *   Depends on `kfp>=1.6.1,!=1.7.2,<2` in \[kfp\] extra.
 
