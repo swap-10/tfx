@@ -25,6 +25,7 @@ import tensorflow as tf
 from tfx.experimental.templates import test_utils
 from tfx.orchestration import test_utils as orchestration_test_utils
 from tfx.orchestration.kubeflow.v2 import test_utils as kubeflow_v2_test_utils
+from tfx.utils import docker_utils
 from tfx.utils import retry
 
 
@@ -79,18 +80,19 @@ class TaxiTemplateKubeflowV2E2ETest(test_utils.BaseEndToEndTest):
     orchestration_test_utils.delete_gcs_files(self._GCP_PROJECT_ID,
                                               self._BUCKET_NAME, path)
 
-  @retry.retry(ignore_eventual_failure=True)
   def _delete_docker_image(self, image):
     subprocess.check_output(['gcloud', 'container', 'images', 'delete', image])
     docker.from_env().images.remove(image=image)
 
+  @retry.retry(ignore_eventual_failure=True)
   def _delete_base_container_image(self):
     if self._base_container_image == self._BASE_CONTAINER_IMAGE:
       return  # Didn't generate a base image for the test.
-    self._delete_docker_image(self._base_container_image)
+    docker_utils.delete_image(self._base_container_image)
 
+  @retry.retry(ignore_eventual_failure=True)
   def _delete_target_container_image(self):
-    self._delete_docker_image(self._target_container_image)
+    docker_utils.delete_image(self._target_container_image)
 
   def _prepare_base_container_image(self):
     orchestration_test_utils.build_docker_image(self._base_container_image,
