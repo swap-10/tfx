@@ -80,7 +80,7 @@ def create_pipeline(
   # TODO(step 6): Uncomment here to add Transform to the pipeline.
   # components.append(transform)
 
-  # Uses user-provided Python function that implements a model.
+  # Uses user-provided Python function that implements a model using TF-Learn.
   trainer_args = {
       'run_fn': run_fn,
       'transformed_examples': transform.outputs['transformed_examples'],
